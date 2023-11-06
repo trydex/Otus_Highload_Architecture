@@ -1,0 +1,32 @@
+version: "3.9"
+
+volumes:
+  social-network-db:
+    name: social-network-db
+    
+services:
+  customer-network-db:
+    image: postgres:latest
+    container_name: social-network-db
+    environment:
+      - POSTGRES_DB=social_network
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    ports:
+      - "15432:5432"
+    volumes:
+      - social-network-db:/var/lib/postgresql/data
+        
+  social-network-app:
+    build:
+      context: ./src
+      dockerfile: ./Host/Dockerfile
+    ports:
+      - "8080:80"
+      - "8081:443"
+    container_name: social-network-app
+    depends_on: 
+      - customer-network-db
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DbSettings__ConnectionString: "User ID=test;Password=test;Server=customer-network-db;Port=5432;Database=social_network;"
